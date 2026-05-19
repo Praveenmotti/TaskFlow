@@ -14,48 +14,97 @@ const SAMPLE_TASKS = [
 
 export function TaskProvider({ children }) {
   const { user } = useAuth()
-
-  const getKey = () => user ? `tf_tasks_${user.id}` : null
-
   const [tasks, setTasks] = useState([])
 
   useEffect(() => {
-    const key = getKey()
-    if (!key) { setTasks([]); return }
-    const stored = localStorage.getItem(key)
-    if (stored) {
-      setTasks(JSON.parse(stored))
-    } else {
-      setTasks(SAMPLE_TASKS)
-      localStorage.setItem(key, JSON.stringify(SAMPLE_TASKS))
+    if (!user) { setTasks([]); return }
+    const fetchTasks = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/api/tasks', {
+          headers: { 'Authorization': `Bearer ${user.token}` }
+        })
+        const data = await res.json()
+        if (res.ok) {
+          // Map _id to id for seamless frontend compatibility
+          const mapped = data.map(t => ({ ...t, id: t._id }))
+          setTasks(mapped)
+        } else {
+          console.error('Failed to fetch tasks:', data.message)
+        }
+      } catch (err) {
+        console.error('Error fetching tasks:', err)
+      }
     }
+    fetchTasks()
   }, [user])
 
-  const save = (updated) => {
-    setTasks(updated)
-    const key = getKey()
-    if (key) localStorage.setItem(key, JSON.stringify(updated))
+  const addTask = async (task) => {
+    try {
+      const res = await fetch('http://localhost:5001/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(task)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to add task')
+      
+      const mapped = { ...data, id: data._id }
+      setTasks(prev => [mapped, ...prev])
+      return mapped
+    } catch (err) {
+      console.error('Error adding task:', err)
+      throw err
+    }
   }
 
-  const addTask = (task) => {
-    const newTask = { ...task, id: Date.now(), createdAt: new Date().toISOString(), status: 'todo' }
-    save([newTask, ...tasks])
-    return newTask
+  const updateTask = async (id, changes) => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(changes)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to update task')
+      
+      const mapped = { ...data, id: data._id }
+      setTasks(prev => prev.map(t => t.id === id ? mapped : t))
+      return mapped
+    } catch (err) {
+      console.error('Error updating task:', err)
+      throw err
+    }
   }
 
-  const updateTask = (id, changes) => {
-    save(tasks.map(t => t.id === id ? { ...t, ...changes } : t))
+  const deleteTask = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to delete task')
+      
+      setTasks(prev => prev.filter(t => t.id !== id))
+    } catch (err) {
+      console.error('Error deleting task:', err)
+      throw err
+    }
   }
 
-  const deleteTask = (id) => {
-    save(tasks.filter(t => t.id !== id))
-  }
-
-  const toggleComplete = (id) => {
-    save(tasks.map(t => t.id === id
-      ? { ...t, status: t.status === 'completed' ? 'todo' : 'completed' }
-      : t
-    ))
+  const toggleComplete = async (id) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+    const newStatus = task.status === 'completed' ? 'todo' : 'completed'
+    await updateTask(id, { status: newStatus })
   }
 
   const stats = {

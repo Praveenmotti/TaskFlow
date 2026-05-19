@@ -18,7 +18,7 @@ export default function RegisterPage() {
     if (form.password !== form.confirm) { setError('Passwords do not match'); return }
     setLoading(true); setError('')
     try {
-      register(form)
+      await register(form)
       navigate('/dashboard')
     } catch (err) {
       setError(err.message)

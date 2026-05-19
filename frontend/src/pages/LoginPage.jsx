@@ -16,7 +16,7 @@ export default function LoginPage() {
     if (!form.email || !form.password) { setError('Please fill in all fields'); return }
     setLoading(true); setError('')
     try {
-      login(form)
+      await login(form)
       navigate('/dashboard')
     } catch (err) {
       setError(err.message)

@@ -48,6 +48,3 @@ export default function App() {
     </AuthProvider>
   )
 }
-<div className="bg-red-500 text-white p-4 text-2xl">
-  TAILWIND TEST - if you see red background it works
-</div>

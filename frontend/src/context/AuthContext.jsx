@@ -8,26 +8,32 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null
   })
 
-  const register = ({ name, email, password }) => {
-    const users = JSON.parse(localStorage.getItem('tf_users') || '[]')
-    const exists = users.find(u => u.email === email)
-    if (exists) throw new Error('Email already registered')
-    const newUser = { id: Date.now(), name, email, password, createdAt: new Date().toISOString() }
-    localStorage.setItem('tf_users', JSON.stringify([...users, newUser]))
-    const { password: _, ...safeUser } = newUser
-    setUser(safeUser)
-    localStorage.setItem('tf_user', JSON.stringify(safeUser))
-    return safeUser
+  const register = async ({ name, email, password }) => {
+    const res = await fetch('http://localhost:5001/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Registration failed')
+    
+    setUser(data)
+    localStorage.setItem('tf_user', JSON.stringify(data))
+    return data
   }
 
-  const login = ({ email, password }) => {
-    const users = JSON.parse(localStorage.getItem('tf_users') || '[]')
-    const found = users.find(u => u.email === email && u.password === password)
-    if (!found) throw new Error('Invalid email or password')
-    const { password: _, ...safeUser } = found
-    setUser(safeUser)
-    localStorage.setItem('tf_user', JSON.stringify(safeUser))
-    return safeUser
+  const login = async ({ email, password }) => {
+    const res = await fetch('http://localhost:5001/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Login failed')
+    
+    setUser(data)
+    localStorage.setItem('tf_user', JSON.stringify(data))
+    return data
   }
 
   const logout = () => {
