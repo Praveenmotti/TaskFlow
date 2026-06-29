@@ -3,7 +3,7 @@
 A full-stack Task Management web app built with the MERN stack.
 
 ## 🔗 Live Demo
-- 🌐 Frontend: [Coming soon - Vercel]
+- 🌐 Frontend: - 🌐 Frontend: [https://task-flow-two-wheat.vercel.app](https://task-flow-two-wheat.vercel.app)
 - ⚙️ Backend API: https://taskflow-34b7.onrender.com
 
 ## ✨ Features
