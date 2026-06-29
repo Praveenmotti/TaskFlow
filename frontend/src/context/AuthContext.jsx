@@ -9,10 +9,11 @@ export function AuthProvider({ children }) {
   })
 
   const register = async ({ name, email, password }) => {
+    const normalizedEmail = email.trim().toLowerCase()
     const res = await fetch('http://localhost:5001/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name: name.trim(), email: normalizedEmail, password })
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || 'Registration failed')
@@ -23,10 +24,11 @@ export function AuthProvider({ children }) {
   }
 
   const login = async ({ email, password }) => {
+    const normalizedEmail = email.trim().toLowerCase()
     const res = await fetch('http://localhost:5001/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email: normalizedEmail, password })
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || 'Login failed')

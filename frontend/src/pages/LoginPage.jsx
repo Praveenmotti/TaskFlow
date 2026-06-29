@@ -13,10 +13,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.email || !form.password) { setError('Please fill in all fields'); return }
-    setLoading(true); setError('')
+    if (!form.email || !form.password) {
+      setError('Please fill in all fields')
+      return
+    }
+    setLoading(true)
+    setError('')
     try {
-      await login(form)
+      login(form)
       navigate('/dashboard')
     } catch (err) {
       setError(err.message)
@@ -26,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060612] flex items-center justify-center p-4 font-outfit relative overflow-hidden">
+    <div className="min-h-screen bg-[#060612] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute w-[600px] h-[600px] rounded-full bg-violet-700/10 blur-3xl -top-40 -left-40 pointer-events-none" />
       <div className="absolute w-[400px] h-[400px] rounded-full bg-cyan-700/8 blur-3xl -bottom-20 -right-20 pointer-events-none" />
@@ -52,28 +56,45 @@ export default function LoginPage() {
               </div>
             )}
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-              <input type="email" value={form.email} onChange={e => { set('email', e.target.value); setError('') }}
-                placeholder="you@example.com" autoComplete="email"
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={e => { set('email', e.target.value); setError('') }}
+                placeholder="you@example.com"
+                autoComplete="email"
                 className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/60 focus:bg-slate-800/80 transition-all"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
-              <input type="password" value={form.password} onChange={e => { set('password', e.target.value); setError('') }}
-                placeholder="Enter your password" autoComplete="current-password"
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={e => { set('password', e.target.value); setError('') }}
+                placeholder="Enter your password"
+                autoComplete="current-password"
                 className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/60 focus:bg-slate-800/80 transition-all"
               />
             </div>
-            <button type="submit" disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-bold text-sm transition-all shadow-lg shadow-violet-900/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-bold text-sm transition-all shadow-lg shadow-violet-900/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+            >
               {loading ? '⏳ Signing in...' : 'Sign In →'}
             </button>
           </form>
 
           <p className="text-center text-sm text-slate-500 mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">Create one free</Link>
+            <Link to="/register" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+              Create one free
+            </Link>
           </p>
         </div>
 
