@@ -3,15 +3,6 @@ import { useAuth } from './AuthContext'
 
 const TaskContext = createContext(null)
 
-const SAMPLE_TASKS = [
-  { id: 1, title: 'Set up GitHub repository', description: 'Initialize project and push to GitHub', priority: 'low', status: 'completed', dueDate: '2025-05-01', category: 'Work', createdAt: new Date().toISOString() },
-  { id: 2, title: 'Build auth system with JWT', description: 'Implement login, register, and protected routes', priority: 'high', status: 'in-progress', dueDate: '2025-05-07', category: 'Work', createdAt: new Date().toISOString() },
-  { id: 3, title: 'Design dashboard UI', description: 'Create the main dashboard with stats and task list', priority: 'high', status: 'todo', dueDate: '2025-05-08', category: 'Work', createdAt: new Date().toISOString() },
-  { id: 4, title: 'Connect MongoDB database', description: 'Setup Mongoose schemas and connect to Atlas', priority: 'medium', status: 'todo', dueDate: '2025-05-10', category: 'Work', createdAt: new Date().toISOString() },
-  { id: 5, title: 'Read React documentation', description: 'Cover hooks, context, and router sections', priority: 'medium', status: 'in-progress', dueDate: '2025-05-12', category: 'Learning', createdAt: new Date().toISOString() },
-  { id: 6, title: 'Morning workout', description: '30 min cardio + stretching', priority: 'low', status: 'completed', dueDate: '2025-05-06', category: 'Personal', createdAt: new Date().toISOString() },
-]
-
 export function TaskProvider({ children }) {
   const { user } = useAuth()
   const [tasks, setTasks] = useState([])
@@ -20,12 +11,13 @@ export function TaskProvider({ children }) {
     if (!user) { setTasks([]); return }
     const fetchTasks = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/tasks', {
-          headers: { 'Authorization': `Bearer ${user.token}` }
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, {
+          headers: { 
+            'Authorization': `Bearer ${user.token}` 
+          }
         })
         const data = await res.json()
         if (res.ok) {
-          // Map _id to id for seamless frontend compatibility
           const mapped = data.map(t => ({ ...t, id: t._id }))
           setTasks(mapped)
         } else {
@@ -40,7 +32,7 @@ export function TaskProvider({ children }) {
 
   const addTask = async (task) => {
     try {
-      const res = await fetch('http://localhost:5001/api/tasks', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +42,6 @@ export function TaskProvider({ children }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Failed to add task')
-      
       const mapped = { ...data, id: data._id }
       setTasks(prev => [mapped, ...prev])
       return mapped
@@ -62,7 +53,7 @@ export function TaskProvider({ children }) {
 
   const updateTask = async (id, changes) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +63,6 @@ export function TaskProvider({ children }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Failed to update task')
-      
       const mapped = { ...data, id: data._id }
       setTasks(prev => prev.map(t => t.id === id ? mapped : t))
       return mapped
@@ -84,7 +74,7 @@ export function TaskProvider({ children }) {
 
   const deleteTask = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/tasks/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${user.token}`
@@ -92,7 +82,6 @@ export function TaskProvider({ children }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Failed to delete task')
-      
       setTasks(prev => prev.filter(t => t.id !== id))
     } catch (err) {
       console.error('Error deleting task:', err)
@@ -112,7 +101,9 @@ export function TaskProvider({ children }) {
     todo: tasks.filter(t => t.status === 'todo').length,
     inProgress: tasks.filter(t => t.status === 'in-progress').length,
     completed: tasks.filter(t => t.status === 'completed').length,
-    completionRate: tasks.length ? Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100) : 0,
+    completionRate: tasks.length 
+      ? Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100) 
+      : 0,
   }
 
   return (
