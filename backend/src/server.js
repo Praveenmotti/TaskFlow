@@ -7,16 +7,22 @@ dotenv.config();
 
 const app = express();
 
-// CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://task-flow-two-wheat.vercel.app",
+    origin: function (origin, callback) {
+      if (
+        !origin ||
+        origin.includes('localhost') ||
+        origin.includes('vercel.app')
+      ) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
     credentials: true,
   })
-);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+)
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
