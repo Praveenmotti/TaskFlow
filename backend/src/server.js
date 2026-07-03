@@ -4,14 +4,13 @@ const cors = require("cors");
 const connectDB = require("./config/database");
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
-// CORS — allow your Vercel frontend
+// CORS
 app.use(
   cors({
-   origin: process.env.CLIENT_URL || "https://task-flow-two-wheat.vercel.app",
+    origin: process.env.CLIENT_URL || "https://task-flow-two-wheat.vercel.app",
     credentials: true,
   })
 );
@@ -40,7 +39,7 @@ app.use((req, res) => {
   });
 });
 
-// Global Error Handler
+// Error Handler
 app.use((err, req, res, next) => {
   console.error("Server Error:", err.message);
   res.status(err.statusCode || 500).json({
@@ -49,13 +48,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Only start server if running directly (not on Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    connectDB();
+  });
+} else {
+  connectDB();
+}
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-process.on("unhandledRejection", (err) => {
-  console.error(`Unhandled Rejection: ${err.message}`);
-  server.close(() => process.exit(1));
-});
+module.exports = app;
