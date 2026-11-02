@@ -20,7 +20,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      login(form)
+      await login(form)
       navigate('/dashboard')
     } catch (err) {
       setError(err.message)

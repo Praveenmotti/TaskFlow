@@ -14,18 +14,27 @@ export default function TaskModal({ onClose, task }) {
     category: 'Work',
   })
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (task) setForm({ title: task.title, description: task.description || '', priority: task.priority, status: task.status, dueDate: task.dueDate || '', category: task.category || 'Work' })
+    if (task) setForm({ title: task.title, description: task.description || '', priority: task.priority, status: task.status, dueDate: task.dueDate ? String(task.dueDate).slice(0, 10) : '', category: task.category || 'Work' })
   }, [task])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.title.trim()) { setError('Task title is required'); return }
-    if (isEdit) updateTask(task.id, form)
-    else addTask(form)
-    onClose()
+    setSaving(true)
+    setError('')
+    try {
+      if (isEdit) await updateTask(task.id, form)
+      else await addTask(form)
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Something went wrong')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -116,9 +125,9 @@ export default function TaskModal({ onClose, task }) {
             className="px-5 py-2.5 rounded-xl border border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-600 transition-all text-sm font-semibold">
             Cancel
           </button>
-          <button onClick={handleSubmit}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-bold text-sm transition-all shadow-lg shadow-violet-900/30 hover:-translate-y-0.5">
-            {isEdit ? 'Save Changes' : 'Add Task ✓'}
+          <button onClick={handleSubmit} disabled={saving}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-bold text-sm transition-all shadow-lg shadow-violet-900/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed">
+            {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Add Task ✓'}
           </button>
         </div>
       </div>
